@@ -1,0 +1,14 @@
+# This file contains tests for the GET /api/v1/history endpoint
+# It verifies filtering by transactionId and date, and supports pagination.
+
+### Get by transactionId
+GET http://localhost:8080/api/v1/history?transactionId=3b708a93-8c3a-4537-a994-763f05bf2d46
+Accept: application/json
+
+### Get all conversions made on 2025-04-15
+GET http://localhost:8080/api/v1/history?date=2025-04-15
+Accept: application/json
+
+### Get first page of 3 conversions from 2025-04-15
+GET http://localhost:8080/api/v1/history?date=2025-04-15&page=0&size=3
+Accept: application/json

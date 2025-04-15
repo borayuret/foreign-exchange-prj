@@ -3,40 +3,84 @@ package com.borayuret.fxapi.service;
 import com.borayuret.fxapi.client.ExchangeRateClient;
 import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
+import com.borayuret.fxapi.model.CurrencyConversion;
+import com.borayuret.fxapi.repository.CurrencyConversionRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service layer responsible for handling currency conversion logic.
- * Calculates the converted amount using exchange rates and returns a response with a unique transaction ID.
+ * Service layer for handling currency conversion and retrieving transaction history.
  */
 @Service
 public class CurrencyConversionService {
 
     private final ExchangeRateClient exchangeRateClient;
+    private final CurrencyConversionRepository conversionRepository;
 
-    /**
-     * Constructor-based dependency injection.
-     *
-     * @param exchangeRateClient client for fetching real-time exchange rates
-     */
-    public CurrencyConversionService(ExchangeRateClient exchangeRateClient) {
+    public CurrencyConversionService(ExchangeRateClient exchangeRateClient,
+                                     CurrencyConversionRepository conversionRepository) {
         this.exchangeRateClient = exchangeRateClient;
+        this.conversionRepository = conversionRepository;
     }
 
     /**
-     * Converts a given amount from one currency to another.
-     * Generates a unique transaction ID for tracking the conversion.
+     * Converts a given amount from one currency to another,
+     * persists the conversion to the database, and returns a response DTO.
      *
-     * @param request the conversion request containing amount, source, and target currencies
-     * @return a response DTO containing the converted amount and a transaction ID
+     * @param request the conversion request containing amount, from and to currencies
+     * @return the conversion result with transaction ID
      */
     public CurrencyConversionResponseDTO convertCurrency(CurrencyConversionRequestDTO request) {
         double rate = exchangeRateClient.getRate(request.getFrom(), request.getTo());
         double convertedAmount = request.getAmount() * rate;
         UUID transactionId = UUID.randomUUID();
+        LocalDateTime timestamp = LocalDateTime.now();
+
+        CurrencyConversion conversion = new CurrencyConversion(
+                transactionId,
+                request.getAmount(),
+                request.getFrom(),
+                request.getTo(),
+                rate,
+                convertedAmount,
+                timestamp
+        );
+
+        conversionRepository.save(conversion);
 
         return new CurrencyConversionResponseDTO(convertedAmount, transactionId);
+    }
+
+    /**
+     * Retrieves a paginated list of conversions filtered by transaction ID or date.
+     * At least one parameter must be provided.
+     *
+     * @param transactionId optional transaction ID
+     * @param date optional transaction date
+     * @param pageable pagination info
+     * @return a paginated list of matching conversion records
+     */
+    public Page<CurrencyConversion> getConversionHistory(UUID transactionId, LocalDate date, Pageable pageable) {
+        if (transactionId != null) {
+            Optional<CurrencyConversion> result = conversionRepository.findByTransactionId(transactionId);
+            return result
+                    .map(conversion -> new PageImpl<CurrencyConversion>(List.of(conversion), pageable, 1))
+                    .orElse(new PageImpl<CurrencyConversion>(List.of(), pageable, 0));
+        } else if (date != null) {
+            LocalDateTime start = date.atStartOfDay();
+            LocalDateTime end = date.atTime(LocalTime.MAX);
+            return conversionRepository.findByTimestampBetween(start, end, pageable);
+        } else {
+            throw new IllegalArgumentException("Either transactionId or date must be provided.");
+        }
     }
 }

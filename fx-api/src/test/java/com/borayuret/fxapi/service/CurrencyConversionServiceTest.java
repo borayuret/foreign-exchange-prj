@@ -3,7 +3,20 @@ package com.borayuret.fxapi.service;
 import com.borayuret.fxapi.client.ExchangeRateClient;
 import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
+import com.borayuret.fxapi.model.CurrencyConversion;
+import com.borayuret.fxapi.repository.CurrencyConversionRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -17,22 +30,83 @@ class CurrencyConversionServiceTest {
 
     @Test
     void shouldReturnCorrectConvertedAmountAndTransactionId() {
-        // Arrange: mock the ExchangeRateClient dependency
+        // Arrange
         ExchangeRateClient mockClient = mock(ExchangeRateClient.class);
-        CurrencyConversionService service = new CurrencyConversionService(mockClient);
+        CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
+        CurrencyConversionService service = new CurrencyConversionService(mockClient, mockRepo);
 
-        // Prepare request and mock rate
         CurrencyConversionRequestDTO request = new CurrencyConversionRequestDTO(100.0, "USD", "TRY");
         double mockRate = 38.0;
 
-        // Define mock behavior
         when(mockClient.getRate("USD", "TRY")).thenReturn(mockRate);
 
-        // Act: perform conversion
+        // Act
         CurrencyConversionResponseDTO response = service.convertCurrency(request);
 
-        // Assert: verify converted amount and non-null transaction ID
+        // Assert
         assertNotNull(response.getTransactionId(), "Transaction ID should not be null");
-        assertEquals(3800.0, response.getConvertedAmount(), 0.0001, "Converted amount should match expected value");
+        assertEquals(3800.0, response.getConvertedAmount(), 0.0001, "Converted amount should be correct");
+    }
+
+    @Test
+    void shouldReturnPageWithSingleConversion_WhenTransactionIdIsGiven() {
+        // Arrange
+        UUID transactionId = UUID.randomUUID();
+        CurrencyConversion mockConversion = new CurrencyConversion();
+        mockConversion.setTransactionId(transactionId);
+
+        CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
+        when(mockRepo.findByTransactionId(transactionId)).thenReturn(Optional.of(mockConversion));
+
+        CurrencyConversionService service = new CurrencyConversionService(mock(ExchangeRateClient.class), mockRepo);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // Act
+        Page<CurrencyConversion> result = service.getConversionHistory(transactionId, null, pageable);
+
+        // Assert
+        assertEquals(1, result.getTotalElements());
+        assertEquals(transactionId, result.getContent().get(0).getTransactionId());
+    }
+
+    @Test
+    void shouldReturnConversionsByDate_WhenDateIsProvided() {
+        // Arrange
+        LocalDate date = LocalDate.of(2025, 4, 15);
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(LocalTime.MAX);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        CurrencyConversion mockConversion = new CurrencyConversion();
+        mockConversion.setTimestamp(start.plusHours(12)); // Noon
+
+        List<CurrencyConversion> mockList = List.of(mockConversion);
+        Page<CurrencyConversion> mockPage = new PageImpl<>(mockList, pageable, mockList.size());
+
+        CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
+        when(mockRepo.findByTimestampBetween(start, end, pageable)).thenReturn(mockPage);
+
+        CurrencyConversionService service = new CurrencyConversionService(mock(ExchangeRateClient.class), mockRepo);
+
+        // Act
+        Page<CurrencyConversion> result = service.getConversionHistory(null, date, pageable);
+
+        // Assert
+        assertEquals(1, result.getTotalElements());
+        assertEquals(mockConversion.getTimestamp(), result.getContent().get(0).getTimestamp());
+    }
+
+    @Test
+    void shouldThrowException_WhenNoFilterIsProvided() {
+        // Arrange
+        CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
+        CurrencyConversionService service = new CurrencyConversionService(mock(ExchangeRateClient.class), mockRepo);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getConversionHistory(null, null, pageable);
+        });
     }
 }

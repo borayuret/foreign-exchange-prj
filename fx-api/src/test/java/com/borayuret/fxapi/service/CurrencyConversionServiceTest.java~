@@ -1,0 +1,40 @@
+package com.borayuret.fxapi.service;
+
+import com.borayuret.fxapi.client.ExchangeRateClient;
+import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
+import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
+import com.borayuret.fxapi.repository.CurrencyConversionRepository;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Unit test for CurrencyConversionService.
+ * Ensures that the conversion logic correctly calculates the amount
+ * and generates a transaction ID.
+ */
+class CurrencyConversionServiceTest {
+
+    @Test
+    void shouldReturnCorrectConvertedAmountAndTransactionId() {
+        // Arrange
+        ExchangeRateClient mockClient = mock(ExchangeRateClient.class);
+        CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
+        CurrencyConversionService service = new CurrencyConversionService(mockClient, mockRepo);
+
+        CurrencyConversionRequestDTO request = new CurrencyConversionRequestDTO(100.0, "USD", "TRY");
+        double mockRate = 38.0;
+
+        when(mockClient.getRate("USD", "TRY")).thenReturn(mockRate);
+
+        // Act
+        CurrencyConversionResponseDTO response = service.convertCurrency(request);
+
+        // Assert
+        assertNotNull(response.getTransactionId(), "Transaction ID should not be null");
+        assertEquals(3800.0, response.getConvertedAmount(), 0.0001, "Converted amount should be correct");
+    }
+
+    
+}

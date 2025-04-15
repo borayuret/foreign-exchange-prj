@@ -12,3 +12,15 @@ Accept: application/json
   "from": "USD",
   "to": "EUR"
 }
+
+
+### Convert 50 USD to TRY
+POST http://localhost:8080/api/v1/convert
+Content-Type: application/json
+Accept: application/json
+
+{
+  "amount": 50,
+  "from": "USD",
+  "to": "TRY"
+}
