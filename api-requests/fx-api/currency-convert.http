@@ -1,0 +1,14 @@
+# This request tests the POST /convert endpoint of the currency conversion API.
+# It sends a JSON payload with amount, source currency, and target currency,
+# and expects a JSON response with the converted amount and a unique transaction ID.
+
+### Convert 100 USD to EUR
+POST http://localhost:8080/api/v1/convert
+Content-Type: application/json
+Accept: application/json
+
+{
+  "amount": 100,
+  "from": "USD",
+  "to": "EUR"
+}
