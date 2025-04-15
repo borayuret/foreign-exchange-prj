@@ -1,0 +1,14 @@
+### Get exchange rate from USD to EUR
+# Sends a GET request to retrieve the exchange rate from USD to EUR.
+
+GET http://localhost:8080/api/v1/rate?from=USD&to=EUR
+Accept: application/json
+
+### Get exchange rate from EUR to TRY
+GET http://localhost:8080/api/v1/rate?from=EUR&to=TRY
+Accept: application/json
+
+### Get exchange rate from GBP to USD
+GET http://localhost:8080/api/v1/rate?from=GBP&to=USD
+Accept: application/json
+
