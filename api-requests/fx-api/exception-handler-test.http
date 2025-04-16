@@ -1,0 +1,20 @@
+# This file tests the global exception handling behavior of the API.
+
+### 1. Trigger IllegalArgumentException by calling /history with no params
+GET http://localhost:8080/api/v1/history
+Accept: application/json
+
+### 2. Trigger MethodArgumentTypeMismatchException (invalid UUID)
+GET http://localhost:8080/api/v1/history?transactionId=invalid-uuid
+Accept: application/json
+
+### 3. Trigger HttpMessageNotReadableException (malformed JSON)
+POST http://localhost:8080/api/v1/convert
+Content-Type: application/json
+Accept: application/json
+
+{
+  "amount": 100,
+  "from": "USD"
+  "to": "TRY"  // missing comma!
+}
