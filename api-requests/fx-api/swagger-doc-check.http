@@ -1,0 +1,9 @@
+# This request validates that Swagger/OpenAPI documentation includes error response codes
+# for each endpoint. Used for verifying the @ApiResponse annotations in Swagger UI.
+
+### Access Swagger UI manually:
+# http://localhost:8080/swagger-ui/index.html
+
+### Or access OpenAPI JSON directly (for automated check)
+GET http://localhost:8080/v3/api-docs
+Accept: application/json

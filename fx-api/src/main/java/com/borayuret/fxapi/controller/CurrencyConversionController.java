@@ -5,6 +5,8 @@ import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
 import com.borayuret.fxapi.model.CurrencyConversion;
 import com.borayuret.fxapi.service.CurrencyConversionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +53,11 @@ public class CurrencyConversionController {
      * @return response containing the converted amount and a unique transaction ID
      */
     @Operation(summary = "Convert currency amount", description = "Converts an amount from one currency to another using exchange rates.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Conversion successful"),
+            @ApiResponse(responseCode = "400", description = "Malformed or invalid JSON (ERR_MALFORMED_JSON)"),
+            @ApiResponse(responseCode = "500", description = "Unexpected server error (ERR_INTERNAL_SERVER)")
+    })
     @PostMapping(value = "/convert", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public CurrencyConversionResponseDTO convert(@RequestBody CurrencyConversionRequestDTO requestDTO) {
         return conversionService.convertCurrency(requestDTO);
@@ -67,6 +74,11 @@ public class CurrencyConversionController {
      * @return paginated list of conversion records
      */
     @Operation(summary = "Get conversion history", description = "Returns a paginated list of conversion records filtered by transactionId or date.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "History retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Missing or invalid parameters (ERR_INVALID_PARAMS / ERR_INVALID_TYPE)"),
+            @ApiResponse(responseCode = "500", description = "Unexpected server error (ERR_INTERNAL_SERVER)")
+    })
     @GetMapping("/history")
     public Page<CurrencyConversion> getConversionHistory(
             @RequestParam(required = false) UUID transactionId,
