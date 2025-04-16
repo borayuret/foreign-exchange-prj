@@ -66,7 +66,6 @@ public class CurrencyConversionController {
      * @param pageable pagination settings (page, size)
      * @return paginated list of conversion records
      */
-    @Operation(summary = "Get conversion history", description = "Returns a paginated list of conversion records filtered by transactionId or date.")
     @GetMapping("/history")
     public Page<CurrencyConversion> getConversionHistory(
             @RequestParam(required = false) UUID transactionId,
