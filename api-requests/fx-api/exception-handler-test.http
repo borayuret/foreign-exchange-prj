@@ -18,3 +18,8 @@ Accept: application/json
   "from": "USD"
   "to": "TRY"  // missing comma!
 }
+
+
+### 4. Trigger generic exception by accessing invalid endpoint (optional)
+GET http://localhost:8080/api/v1/unknown
+Accept: application/json
