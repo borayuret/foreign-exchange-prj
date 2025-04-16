@@ -13,7 +13,6 @@ public class CurrencyConversionRequestDTO {
     private double amount;
     @Schema(description = "Source currency", example = "USD")
     private String from;
-    @Schema(description = "Target currency", example = "EUR")
     private String to;
 
     public CurrencyConversionRequestDTO() {
