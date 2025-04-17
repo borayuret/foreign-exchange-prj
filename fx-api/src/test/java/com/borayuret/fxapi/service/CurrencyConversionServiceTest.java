@@ -132,6 +132,8 @@ class CurrencyConversionServiceTest {
 
         when(mockClient.getRate("USD", "TRY")).thenReturn(30.0);
         when(mockClient.getRate("EUR", "USD")).thenReturn(1.1);
+
+        // simulating db access
         when(mockRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
