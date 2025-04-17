@@ -1,6 +1,7 @@
 package com.borayuret.fxapi.service;
 
 import com.borayuret.fxapi.client.ExchangeRateClient;
+import com.borayuret.fxapi.dto.BulkCurrencyConversionResponseDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
 import com.borayuret.fxapi.model.CurrencyConversion;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -109,4 +111,46 @@ class CurrencyConversionServiceTest {
             service.getConversionHistory(null, null, pageable);
         });
     }
+
+
+    @Test
+    void shouldProcessCsvFileAndReturnConversionResults() {
+        // Arrange
+        String csvContent = "amount,from,to\n" +
+                "100,USD,TRY\n" +
+                "250,EUR,USD\n";
+        MockMultipartFile csvFile = new MockMultipartFile(
+                "file",
+                "conversions.csv",
+                "text/csv",
+                csvContent.getBytes()
+        );
+
+        ExchangeRateClient mockClient = mock(ExchangeRateClient.class);
+        CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
+        CurrencyConversionService service = new CurrencyConversionService(mockClient, mockRepo);
+
+        when(mockClient.getRate("USD", "TRY")).thenReturn(30.0);
+        when(mockClient.getRate("EUR", "USD")).thenReturn(1.1);
+        when(mockRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        BulkCurrencyConversionResponseDTO result = service.convertFromCsv(csvFile);
+
+        // Assert
+        assertNotNull(result);
+        List<CurrencyConversionResponseDTO> responses = result.getResults();
+        assertEquals(2, responses.size());
+
+        CurrencyConversionResponseDTO first = responses.get(0);
+        assertEquals(3000.0, first.getConvertedAmount(), 0.01);
+
+        CurrencyConversionResponseDTO second = responses.get(1);
+        assertEquals(275.0, second.getConvertedAmount(), 0.01);
+
+        // Transaction IDs are random, but must not be null
+        assertNotNull(first.getTransactionId());
+        assertNotNull(second.getTransactionId());
+    }
 }
+
