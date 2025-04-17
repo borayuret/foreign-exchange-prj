@@ -1,0 +1,16 @@
+### Test: Bulk currency conversion with CSV file upload
+# This request sends a CSV file to /api/v1/convert/csv endpoint
+# and expects a list of conversion results in response.
+
+POST http://localhost:8080/api/v1/convert/csv
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="test.csv"
+Content-Type: text/csv
+
+amount,from,to
+100,USD,TRY
+250,EUR,USD
+75,GBP,JPY
+--boundary--

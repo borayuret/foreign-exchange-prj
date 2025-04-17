@@ -1,18 +1,27 @@
 package com.borayuret.fxapi.service;
 
 import com.borayuret.fxapi.client.ExchangeRateClient;
+import com.borayuret.fxapi.dto.BulkCurrencyConversionResponseDTO;
+import com.borayuret.fxapi.dto.CsvCurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
 import com.borayuret.fxapi.model.CurrencyConversion;
 import com.borayuret.fxapi.repository.CurrencyConversionRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,5 +91,37 @@ public class CurrencyConversionService {
         } else {
             throw new IllegalArgumentException("Either transactionId or date must be provided.");
         }
+    }
+
+    /**
+     * Processes a CSV file containing multiple currency conversion requests.
+     *
+     * @param file CSV file with columns: amount, from, to
+     * @return list of conversion results
+     */
+    public BulkCurrencyConversionResponseDTO convertFromCsv(MultipartFile file) {
+        List<CurrencyConversionResponseDTO> results = new ArrayList<>();
+
+        try (
+                CSVParser parser = CSVFormat.DEFAULT
+                        .withHeader("amount", "from", "to")
+                        .withSkipHeaderRecord()
+                        .parse(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))
+        ) {
+            for (CSVRecord record : parser) {
+                double amount = Double.parseDouble(record.get("amount"));
+                String from = record.get("from");
+                String to = record.get("to");
+
+                CurrencyConversionRequestDTO request = new CurrencyConversionRequestDTO(amount, from, to);
+                CurrencyConversionResponseDTO result = convertCurrency(request);
+                results.add(result);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process CSV file: " + e.getMessage(), e);
+        }
+
+        return new BulkCurrencyConversionResponseDTO(results);
     }
 }
