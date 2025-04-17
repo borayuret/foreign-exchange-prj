@@ -1,5 +1,6 @@
 package com.borayuret.fxapi.controller;
 
+import com.borayuret.fxapi.dto.BulkCurrencyConversionResponseDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
 import com.borayuret.fxapi.model.CurrencyConversion;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -86,6 +88,27 @@ public class CurrencyConversionController {
             Pageable pageable) {
 
         return conversionService.getConversionHistory(transactionId, date, pageable);
+    }
+
+
+    /**
+     * Accepts a CSV file upload and performs bulk currency conversion.
+     *
+     * @param file CSV file with rows like: amount,from,to
+     * @return list of conversion results for each row
+     */
+    @Operation(
+            summary = "Bulk currency conversion via CSV upload",
+            description = "Processes a CSV file containing multiple currency conversion requests."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All conversions processed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid CSV format or file upload error"),
+            @ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
+    @PostMapping(value = "/convert/csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public BulkCurrencyConversionResponseDTO convertCsv(@RequestPart("file") MultipartFile file) {
+        return conversionService.convertFromCsv(file);
     }
 
 }
