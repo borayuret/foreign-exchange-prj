@@ -1,10 +1,11 @@
 package com.borayuret.fxapi.service;
 
 import com.borayuret.fxapi.client.ExchangeRateClient;
+import com.borayuret.fxapi.client.ExchangeRateClientFactory;
+import com.borayuret.fxapi.client.FixerExchangeRateClient;
 import com.borayuret.fxapi.dto.ExchangeRateResponseDTO;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -16,17 +17,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExchangeRateService {
 
-    private final ExchangeRateClient exchangeRateClient;
+    private final ExchangeRateClientFactory exchangeRateClientFactory;
 
-
-    /**
-     * Constructor-based dependency injection of ExchangeRateClient.
-     *
-     * @param exchangeRateClient client used to retrieve exchange rates from external API
-     */
-    public ExchangeRateService(ExchangeRateClient exchangeRateClient) {
-        this.exchangeRateClient = exchangeRateClient;
+    // Injecting ExchangeRateClientFactory through constructor
+    public ExchangeRateService(ExchangeRateClientFactory exchangeRateClientFactory) {
+        this.exchangeRateClientFactory = exchangeRateClientFactory;
     }
+
+    @Value("${exchange.api.provider:fixer}")  // Get provider from application.properties
+    private String provider;
 
     /**
      * Retrieves the exchange rate from one currency to another.
@@ -37,8 +36,12 @@ public class ExchangeRateService {
      */
     @Cacheable(value = "exchangeRates", key = "'rate_' + #from + '_' + #to")
     public ExchangeRateResponseDTO getExchangeRate(String from, String to) {
+
+
+
+        // Select the appropriate client based on the provider
+        ExchangeRateClient exchangeRateClient = exchangeRateClientFactory.getClient(provider);
         double rate = exchangeRateClient.getRate(from, to);
-        log.info("Calling Fixer API for {} → {}", from, to);
         return new ExchangeRateResponseDTO(from, to, rate);
     }
 }

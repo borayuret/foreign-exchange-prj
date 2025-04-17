@@ -1,8 +1,7 @@
 package com.borayuret.fxapi.service;
 
-import com.borayuret.fxapi.client.ExchangeRateClient;
+import com.borayuret.fxapi.client.FixerExchangeRateClient;
 import com.borayuret.fxapi.dto.BulkCurrencyConversionResponseDTO;
-import com.borayuret.fxapi.dto.CsvCurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
 import com.borayuret.fxapi.model.CurrencyConversion;
@@ -32,10 +31,10 @@ import java.util.UUID;
 @Service
 public class CurrencyConversionService {
 
-    private final ExchangeRateClient exchangeRateClient;
+    private final FixerExchangeRateClient exchangeRateClient;
     private final CurrencyConversionRepository conversionRepository;
 
-    public CurrencyConversionService(ExchangeRateClient exchangeRateClient,
+    public CurrencyConversionService(FixerExchangeRateClient exchangeRateClient,
                                      CurrencyConversionRepository conversionRepository) {
         this.exchangeRateClient = exchangeRateClient;
         this.conversionRepository = conversionRepository;
