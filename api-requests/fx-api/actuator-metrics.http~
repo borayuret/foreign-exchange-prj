@@ -1,0 +1,43 @@
+### List all available metrics
+GET http://localhost:8080/actuator/metrics
+Accept: application/json
+
+
+### Total number of HTTP requests per endpoint
+GET http://localhost:8080/actuator/metrics/http.server.requests
+Accept: application/json
+
+
+
+
+
+### JVM Memory usage
+GET http://localhost:8080/actuator/metrics/jvm.memory.used
+Accept: application/json
+
+### JVM Threads (live/peak/daemon)
+GET http://localhost:8080/actuator/metrics/jvm.threads.live
+Accept: application/json
+
+### JVM GC (garbage collection activity)
+GET http://localhost:8080/actuator/metrics/jvm.gc.memory.allocated
+Accept: application/json
+
+
+### Database Connection Pool usage (HikariCP)
+GET http://localhost:8080/actuator/metrics/hikaricp.connections.active
+Accept: application/json
+
+GET http://localhost:8080/actuator/metrics/hikaricp.connections.max
+Accept: application/json
+
+GET http://localhost:8080/actuator/metrics/hikaricp.connections.usage
+Accept: application/json
+
+
+### Application Uptime
+GET http://localhost:8080/actuator/metrics/process.uptime
+Accept: application/json
+
+
+
