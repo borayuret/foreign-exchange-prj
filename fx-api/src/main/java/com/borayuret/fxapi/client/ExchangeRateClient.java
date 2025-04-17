@@ -16,6 +16,8 @@ import java.util.Map;
 @Component
 public class ExchangeRateClient {
 
+    private static ExchangeRateClient instance;
+
     // Base URL of the Fixer.io API, injected from application properties
     @Value("${fx.api.base-url}")
     private String baseUrl;
@@ -26,6 +28,23 @@ public class ExchangeRateClient {
 
     // Simple HTTP client to perform REST requests
     private final RestTemplate restTemplate = new RestTemplate();
+
+    // Private constructor to prevent instantiation from outside
+    private ExchangeRateClient(@Value("${fx.api.base-url}") String baseUrl,
+                               @Value("${fx.api.key}") String apiKey) {
+        this.baseUrl = baseUrl;
+        this.apiKey = apiKey;
+    }
+
+    // Public method to provide access to the instance
+    public static synchronized ExchangeRateClient getInstance(@Value("${fx.api.base-url}") String baseUrl,
+                                                              @Value("${fx.api.key}") String apiKey) {
+        if (instance == null) {
+            instance = new ExchangeRateClient(baseUrl, apiKey);
+        }
+        return instance;
+    }
+
 
     /**
      * Fetches the exchange rate between two currencies using Fixer.io API.
