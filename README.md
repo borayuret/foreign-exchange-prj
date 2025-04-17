@@ -1,7 +1,7 @@
 # Foreign Exchange API
 
 A self-contained Spring Boot application for real-time currency exchange and conversion.  
-Developed as part of the OpenPayd Java Developer Case Study.
+
 
 ---
 
