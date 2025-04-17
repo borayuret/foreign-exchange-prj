@@ -7,7 +7,7 @@ Developed as part of the OpenPayd Java Developer Case Study.
 
 ## Features
 
-- **Exchange Rate Lookup:** Get real-time exchange rates using Fixer.io
+- **Exchange Rate Lookup:** Get real-time exchange rates using Fixer.io or currencylayer.com
 - **Currency Conversion:** Convert any amount from one currency to another
 - **Transaction History:** Retrieve past conversions with filters
 - **Bulk Conversion:** Upload CSV file and get multiple conversions in one call
