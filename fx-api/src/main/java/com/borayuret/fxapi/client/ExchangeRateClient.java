@@ -1,5 +1,6 @@
 package com.borayuret.fxapi.client;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -11,6 +12,7 @@ import java.util.Map;
  * Client class responsible for communicating with the external exchange rate API (Fixer.io).
  * Fetches currency exchange rates for two given currencies.
  */
+@Slf4j
 @Component
 public class ExchangeRateClient {
 
@@ -39,6 +41,9 @@ public class ExchangeRateClient {
         // Send a GET request and parse the response as a Map
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, null, Map.class);
         Map<String, Object> body = response.getBody();
+
+        log.info("Calling Fixer API for {} → {}", from, to);
+
 
         // Check if the API call was successful
         Boolean success = (Boolean) body.get("success");

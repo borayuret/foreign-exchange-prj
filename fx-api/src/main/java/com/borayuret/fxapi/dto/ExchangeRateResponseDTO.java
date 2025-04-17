@@ -1,14 +1,18 @@
 package com.borayuret.fxapi.dto;
 
+import java.io.Serializable;
+
 /**
  * Data Transfer Object representing the response structure for an exchange rate request.
  * Contains the source currency, target currency, and the calculated exchange rate.
  */
-public class ExchangeRateResponseDTO {
+public class ExchangeRateResponseDTO implements Serializable {
 
     private String from;
     private String to;
     private double rate;
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Default constructor for deserialization or framework usage.
