@@ -42,7 +42,11 @@ public class GlobalExceptionHandler {
      * Catch-all handler for any unhandled exception.
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) throws Exception {
+        if (request.getRequestURI().startsWith("/actuator")) {
+            throw ex; // actuator request ise framework'e bırak
+        }
+
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred.", request.getRequestURI(), "ERR_INTERNAL_SERVER");
     }
 
