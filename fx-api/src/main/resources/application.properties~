@@ -18,7 +18,9 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 
-
+# External FX API (mock values ? will be overriden)
+fx.api.base-url=https://data.fixer.io/api
+fx.api.key=85b255b87933cc53ccf7f02ae16f4c72
 
 
 logging.level.org.springdoc=DEBUG
@@ -40,13 +42,5 @@ management.metrics.tags.application=fx-api
 
 # Define which API provider to use for exchange rates
 exchange.api.provider=fixer  # Default: fixer, you can use 'currencylayer' as well
-
-# External FX API (mock values ? will be overriden)
-fx.api.base-url=https://data.fixer.io/api
-fx.api.key=85b255b87933cc53ccf7f02ae16f4c72
-
-# CurrencyLayer API configuration
-currencylayer.api.key=a5d7a424c4101e614b5cdb07b924043c
-currencylayer.api.base-url=http://apilayer.net/api/live
 
 

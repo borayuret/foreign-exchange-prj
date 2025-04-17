@@ -1,6 +1,6 @@
 package com.borayuret.fxapi.service;
 
-import com.borayuret.fxapi.client.ExchangeRateClient;
+import com.borayuret.fxapi.client.FixerExchangeRateClient;
 import com.borayuret.fxapi.dto.BulkCurrencyConversionResponseDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionRequestDTO;
 import com.borayuret.fxapi.dto.CurrencyConversionResponseDTO;
@@ -33,7 +33,7 @@ class CurrencyConversionServiceTest {
     @Test
     void shouldReturnCorrectConvertedAmountAndTransactionId() {
         // Arrange
-        ExchangeRateClient mockClient = mock(ExchangeRateClient.class);
+        FixerExchangeRateClient mockClient = mock(FixerExchangeRateClient.class);
         CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
         CurrencyConversionService service = new CurrencyConversionService(mockClient, mockRepo);
 
@@ -60,7 +60,7 @@ class CurrencyConversionServiceTest {
         CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
         when(mockRepo.findByTransactionId(transactionId)).thenReturn(Optional.of(mockConversion));
 
-        CurrencyConversionService service = new CurrencyConversionService(mock(ExchangeRateClient.class), mockRepo);
+        CurrencyConversionService service = new CurrencyConversionService(mock(FixerExchangeRateClient.class), mockRepo);
         Pageable pageable = PageRequest.of(0, 10);
 
         // Act
@@ -89,7 +89,7 @@ class CurrencyConversionServiceTest {
         CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
         when(mockRepo.findByTimestampBetween(start, end, pageable)).thenReturn(mockPage);
 
-        CurrencyConversionService service = new CurrencyConversionService(mock(ExchangeRateClient.class), mockRepo);
+        CurrencyConversionService service = new CurrencyConversionService(mock(FixerExchangeRateClient.class), mockRepo);
 
         // Act
         Page<CurrencyConversion> result = service.getConversionHistory(null, date, pageable);
@@ -103,7 +103,7 @@ class CurrencyConversionServiceTest {
     void shouldThrowException_WhenNoFilterIsProvided() {
         // Arrange
         CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
-        CurrencyConversionService service = new CurrencyConversionService(mock(ExchangeRateClient.class), mockRepo);
+        CurrencyConversionService service = new CurrencyConversionService(mock(FixerExchangeRateClient.class), mockRepo);
         Pageable pageable = PageRequest.of(0, 10);
 
         // Act & Assert
@@ -126,7 +126,7 @@ class CurrencyConversionServiceTest {
                 csvContent.getBytes()
         );
 
-        ExchangeRateClient mockClient = mock(ExchangeRateClient.class);
+        FixerExchangeRateClient mockClient = mock(FixerExchangeRateClient.class);
         CurrencyConversionRepository mockRepo = mock(CurrencyConversionRepository.class);
         CurrencyConversionService service = new CurrencyConversionService(mockClient, mockRepo);
 
